@@ -1,9 +1,52 @@
 var path = require('path');
 var archive = require('../helpers/archive-helpers');
+var request = require('request');
+var url = require('url');
+var http = require('http');
+var fs = require('fs');
+
+
 // require more modules/folders here!
 
 exports.handleRequest = function (req, res) {
-  res.end(archive.paths.list);
+  // res.end(archive.paths.main);
+  var headers = defaultCorsHeaders;
+  var urlpath = url.parse(req.url).pathname;
+  var contentType = 'text/html'
+  var route = path.join(__dirname, urlpath);
+
+	var goToSite = function(url,contentType) {
+    fs.readFile(url, function(err, content) {
+      headers['Content-Type'] = contentType;
+      if (err) {
+        res.writeHead(404, headers);
+        res.end('404');
+        return;
+      }
+      res.writeHead(200, headers);
+      res.end(content);
+    });
+  }
+
+  if (path.extname(req.url) === '.css') {
+  	route = archive.paths.siteAssets+'/styles.css';
+  	contentType = 'text/css';
+  } else if (urlpath === '/') {
+	  route = archive.paths.main
+  }
+
+
+  goToSite(route, contentType);
+
+  var actions = {
+  	// "GET" : getSite(targetUrl),
+  	// "POST": saveSite(targetUrl),
+  }
+
+
+	// if(req.method === "GET")  { actions.GET }
+	// if(req.method === "POST") { actions.POST }
+
 
   var getSite = function (targetUrl){
   	//check if it is in the list
@@ -11,25 +54,28 @@ exports.handleRequest = function (req, res) {
       //if so
       //determine if website is archived
       if (isInList){
-        archive.isUrlArchived(targetUrl, fuction(isArchived){
+        archive.isUrlArchived(targetUrl, function(isArchived){
         	if(isArchived){
-      //if yes then redirect to archived website
+  			goToSite(archive.paths.archivedSites+ '/'+ targetUrl, 'html'); //?
         	} else {
-      //if not direct to loading
+  			goToSite(archive.paths.siteAssets+ "/loading.html", 'html');
         	}
         })
       } else {
   	    archive.addUrlToList(targetUrl)
-  	///// redirect to loading page
-
+  			goToSite(archive.paths.siteAssets+ "/loading.html", 'html');
       }
   	})
-
   }
 
-  var sendSite = function(){
+  var saveSite = function(newUrl){
 
   }
-
 };
 
+var defaultCorsHeaders = {
+  "access-control-allow-origin": "*",
+  "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "access-control-allow-headers": "content-type, accept",
+  "access-control-max-age": 10 // Seconds.
+};

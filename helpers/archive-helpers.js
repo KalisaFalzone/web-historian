@@ -9,6 +9,8 @@ var _ = require('underscore');
  * customize it in any way you wish.
  */
 
+var websites;
+
 exports.paths = {
   siteAssets: path.join(__dirname, '../web/public'),
   archivedSites: path.join(__dirname, '../archives/sites'),
@@ -25,17 +27,39 @@ exports.initialize = function(pathsObj){
 // The following function names are provided to you to suggest how you might
 // modularize your code. Keep it clean!
 
-exports.readListOfUrls = function(){
+exports.readListOfUrls = function(cb){
+	// get websites from server
+	fs.readFile(../archives/sites.txt, function(err, websites){
+		if (err) {console.log("error in readListOfUrls")}
+    cb(websites);
+	})
+
 };
 
-exports.isUrlInList = function(){
+exports.isUrlInList = function(targetUrl, cb){
+  readListOfUrls(function(targetUrl, listOfWebsites){
+  	listOfWebsites = listOfWebsites.split('\n');
+  	cb(listOfWebsites.indexOf(targetUrl) !== -1);
+  })
+
 };
 
-exports.addUrlToList = function(){
+exports.addUrlToList = function(url){
+	fs.appendFile('../archives/sites.txt', url+ '\n', function (err) {
+	  if (err) {
+	  	throw err;
+	  }
+	  console.log( url, ' was appended to the list of sites!');
+	});
 };
 
-exports.isUrlArchived = function(){
+exports.isUrlArchived = function(url, cb){
+	fs.exists("../archives/sites/"+url, function(doesExist){
+		cb(doesExist);
+	})
+	///how's that name?
 };
 
 exports.downloadUrls = function(){
+
 };

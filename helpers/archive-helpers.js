@@ -29,14 +29,13 @@ exports.initialize = function(pathsObj){
 exports.readListOfUrls = function(targetUrl, cb){
 	fs.readFile(exports.paths.list, 'utf8', function(err, websites){
 		if (err) {console.log("error in readListOfUrls")}
-		console.log('websites', websites);
-    cb(targetUrl, websites);
+    websites = websites.split('\n');
+    cb(websites, targetUrl);
 	});
 };
 
 exports.isUrlInList = function(targetUrl, cb){
-  exports.readListOfUrls(targetUrl, function(targetUrl, listOfWebsites){
-  	listOfWebsites = listOfWebsites.split('\n');
+  exports.readListOfUrls(targetUrl, function(listOfWebsites, targetUrl){
   	cb(listOfWebsites.indexOf(targetUrl) !== -1);
   });
 };
@@ -51,19 +50,27 @@ exports.addUrlToList = function(targetUrl){
 };
 
 exports.isUrlArchived = function(targetUrl, cb){
-	fs.exists(exports.paths.archivedSites+targetUrl, function(doesExist){
+	fs.exists(exports.paths.archivedSites+'/'+targetUrl, function(doesExist){
+    console.log(doesExist, 'doesExist', exports.paths.archivedSites+targetUrl)
 		cb(doesExist);
 	});
 };
 
 exports.downloadUrls = function(targetUrl){
-	request(targetUrl, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
-      console.log(body);
-      fs.writeFile(targetUrl, body, function (err) {
-        if (err) throw err;
-        console.log('It\'s saved!');
-			});
+  exports.isUrlArchived(targetUrl, function(found){
+    if(!found) {
+       request('http://' + targetUrl).pipe(fs.createWriteStream(exports.paths.archivedSites + "/" + targetUrl));
+
+    	// request(targetUrl, function (error, response, body) {
+     //    console.log(response.statusCode, 'statuscode')
+     //    if (!error && response.statusCode == 200) {
+     //      console.log(body);
+     //      fs.writeFile(targetUrl, body, function (err) {
+     //        if (err) throw err;
+     //        console.log('It\'s saved!');
+    	// 		});
+     //    }
+     //  });
     }
   });
 };

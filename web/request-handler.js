@@ -36,20 +36,17 @@ exports.handleRequest = function (req, res) {
 	  route = archive.paths.main
   }
 
-
-
   var handleInput = function (targetUrl){
-    console.log('HI works!', targetUrl)
     //check if it is in the list
     archive.isUrlInList(targetUrl, function(isInList){
       //if so
-      //determine if website is archived
       if (isInList){
         archive.isUrlArchived(targetUrl, function(isArchived){
           if(isArchived){
-        goToSite(archive.paths.archivedSites+ '/'+ targetUrl, 'html'); //?
+            console.log(archive.paths.archivedSites+ '/'+ targetUrl);
+            goToSite(archive.paths.archivedSites+ '/'+ targetUrl, 'html'); //?
           } else {
-        goToSite(archive.paths.siteAssets+ "/loading.html", 'html');
+            goToSite(archive.paths.siteAssets+ "/loading.html", 'html');
           }
         })
       } else {
@@ -70,11 +67,8 @@ exports.handleRequest = function (req, res) {
     });
   }
 
-  var saveSite = function(newUrl){
-
-  };
-
 };
+
 
 var defaultCorsHeaders = {
   "access-control-allow-origin": "*",

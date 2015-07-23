@@ -15,6 +15,7 @@ exports.handleRequest = function (req, res) {
   var contentType = 'text/html'
   var route = path.join(__dirname, urlpath);
 
+
 	var goToSite = function(url,contentType) {
     fs.readFile(url, function(err, content) {
       headers['Content-Type'] = contentType;
@@ -36,41 +37,43 @@ exports.handleRequest = function (req, res) {
   }
 
 
-  goToSite(route, contentType);
 
-  var actions = {
-  	// "GET" : getSite(targetUrl),
-  	// "POST": saveSite(targetUrl),
-  }
-
-
-	// if(req.method === "GET")  { actions.GET }
-	// if(req.method === "POST") { actions.POST }
-
-
-  var getSite = function (targetUrl){
-  	//check if it is in the list
-  	archive.isUrlInList(targetUrl, function(isInList){
+  var handleInput = function (targetUrl){
+    console.log('HI works!', targetUrl)
+    //check if it is in the list
+    archive.isUrlInList(targetUrl, function(isInList){
       //if so
       //determine if website is archived
       if (isInList){
         archive.isUrlArchived(targetUrl, function(isArchived){
-        	if(isArchived){
-  			goToSite(archive.paths.archivedSites+ '/'+ targetUrl, 'html'); //?
-        	} else {
-  			goToSite(archive.paths.siteAssets+ "/loading.html", 'html');
-        	}
+          if(isArchived){
+        goToSite(archive.paths.archivedSites+ '/'+ targetUrl, 'html'); //?
+          } else {
+        goToSite(archive.paths.siteAssets+ "/loading.html", 'html');
+          }
         })
       } else {
-  	    archive.addUrlToList(targetUrl)
-  			goToSite(archive.paths.siteAssets+ "/loading.html", 'html');
+        archive.addUrlToList(targetUrl)
+        goToSite(archive.paths.siteAssets+ "/loading.html", 'html');
       }
-  	})
+    })
+  }
+
+	if(req.method === "GET")  { goToSite(route, contentType) }
+	if(req.method === "POST") {
+    var data='';
+    req.on('data', function(chunk){
+      data += chunk;
+    });
+    req.on('end', function(){
+      handleInput(data.slice(4));
+    });
   }
 
   var saveSite = function(newUrl){
 
-  }
+  };
+
 };
 
 var defaultCorsHeaders = {

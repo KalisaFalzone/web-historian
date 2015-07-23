@@ -4,9 +4,36 @@
   <link rel="stylesheet" type="text/css" href="styles.css" />
 </head>
 <body>
-  Enter a URL here:
+  Enter a URL here, dude:
   <form method="POST">
-    <input type="input" name="url"></input>
+    <input type="input" id="URL" name="url"></input>
   </form>
+  <script>
+
+
+  function send(newUrl) {
+
+    $.ajax({
+      url: 'http://127.0.0.1:8080/urls',
+      type: 'POST',
+      data: JSON.stringify(newUrl),
+      contentType: 'application/json',
+      success: function (data) {
+        console.log('url sent');
+      },
+      error: function (data) {
+        console.error('Danger Will Robinson');
+      }
+    });
+  };
+
+  $('#URL').on('submit', function(){
+  	send($('#URL').val());
+  })
+
+
+
+
+  </script>
 </body>
 </html>
